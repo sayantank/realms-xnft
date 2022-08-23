@@ -1,16 +1,35 @@
-import ReactXnft, { Text, View } from "react-xnft";
-
-//
-// On connection to the host environment, warm the cache.
-//
-ReactXnft.events.on("connect", () => {
-  // no-op
-});
+import React from "react";
+import { Stack } from "react-xnft";
+import Home from "./pages/Home";
+import Realm from "./pages/Realm";
 
 export function App() {
   return (
-    <View>
-      <Text>Hello, World!</Text>
-    </View>
+    <Stack.Navigator
+      initialRoute={{ name: "home" }}
+      options={({ route }) => {
+        switch (route.name) {
+          case "home":
+            return {
+              title: "Realms",
+            };
+          case "realm":
+            return {
+              title: route.props.realm.displayName,
+            };
+          default:
+            throw new Error("unknown route");
+        }
+      }}
+    >
+      <Stack.Screen
+        name={"home"}
+        component={(props: any) => <Home {...props} />}
+      />
+      <Stack.Screen
+        name={"realm"}
+        component={(props: any) => <Realm {...props} />}
+      />
+    </Stack.Navigator>
   );
 }
