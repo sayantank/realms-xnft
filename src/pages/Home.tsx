@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Button, Text, Image, useNavigation, View } from "react-xnft";
 
 const REALMS = [
@@ -32,6 +32,17 @@ const REALMS = [
 
 function Home() {
   const nav = useNavigation();
+
+  useEffect(() => {
+    nav.setTitleStyle({
+      fontSize: "1.4rem",
+      fontWeight: "bold",
+    });
+    nav.setStyle({
+      backgroundColor: "#111827",
+    });
+  }, []);
+
   return (
     <View
       style={{ height: "100%", padding: "1rem", backgroundColor: "#111827" }}
@@ -55,10 +66,10 @@ function Home() {
             gap: "0.8rem",
           }}
         >
-          {REALMS.map((realm) => (
+          {REALMS.map((realmData) => (
             <Button
-              onClick={() => nav.push("realm", { realm })}
-              key={realm.realmId}
+              onClick={() => nav.push("realm", { realmData })}
+              key={realmData.realmId}
               style={{
                 width: "100%",
                 borderRadius: "0.6rem",
@@ -70,7 +81,7 @@ function Home() {
               }}
             >
               <Image
-                src={realm.ogImage}
+                src={realmData.ogImage}
                 style={{
                   width: "auto",
                   height: "2.4rem",
@@ -78,7 +89,9 @@ function Home() {
                   padding: "0rem 0.6rem",
                 }}
               />
-              <Text style={{ fontSize: "0.7rem" }}>{realm.displayName}</Text>
+              <Text style={{ fontSize: "0.7rem" }}>
+                {realmData.displayName}
+              </Text>
             </Button>
           ))}
         </View>

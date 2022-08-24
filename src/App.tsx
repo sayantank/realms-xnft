@@ -1,5 +1,5 @@
 import React from "react";
-import { Stack } from "react-xnft";
+import { Stack, View } from "react-xnft";
 import Home from "./pages/Home";
 import Realm from "./pages/Realm";
 
@@ -15,7 +15,7 @@ export function App() {
             };
           case "realm":
             return {
-              title: route.props.realm.displayName,
+              title: route.props.realmData.displayName,
             };
           default:
             throw new Error("unknown route");
