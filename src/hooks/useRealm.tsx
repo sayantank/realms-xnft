@@ -3,6 +3,7 @@ import {
   getRealm,
   Governance,
   ProgramAccount,
+  Proposal,
   pubkeyFilter,
   Realm,
 } from "@solana/spl-governance";
@@ -10,6 +11,8 @@ import { getMint, Mint } from "@solana/spl-token";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { useConnection } from "react-xnft";
 import useSWR from "swr";
+import { accountsToPubkeyMap } from "../utils/accounts";
+import { HIDDEN_PROPOSALS } from "../utils/proposals";
 
 const fetchRealm = (connection: Connection, realmAddress: string) => {
   return getRealm(connection, new PublicKey(realmAddress));
@@ -48,6 +51,26 @@ const fetchGovernances = async (
   );
 };
 
+const fetchPropsosals = async (
+  connection: Connection,
+  programId: string,
+  governances: ProgramAccount<Governance>[]
+) => {
+  const proposalsByGovernance = await Promise.all(
+    governances.map((g) =>
+      getGovernanceAccounts(connection, new PublicKey(programId), Proposal, [
+        pubkeyFilter(1, g.pubkey)!,
+      ])
+    )
+  );
+
+  return accountsToPubkeyMap(
+    proposalsByGovernance
+      .flatMap((p) => p)
+      .filter((p) => !HIDDEN_PROPOSALS.has(p.pubkey.toBase58()))
+  );
+};
+
 export const useRealm = (realmId: string, programId: string) => {
   // console.log(`typeof realmId: ${typeof realmId}`);
   const connection = useConnection();
@@ -82,25 +105,49 @@ export const useRealm = (realmId: string, programId: string) => {
 
   const governancesLoading = !governances && !governancesError;
 
+  const {
+    data: proposals,
+    error: proposalsError,
+    mutate: proposalsMutate,
+    isValidating: proposalsIsValidating,
+  } = useSWR(
+    () =>
+      realm && governances && [connection, programId, governances, "proposals"],
+    fetchPropsosals
+  );
+
+  const proposalsLoading = !proposals && !proposalsError;
+
   return {
     realm: {
       data: realm,
       error: realmError,
       mutate: realmMutate,
       isValidating: realmIsValidating,
+      isLoading: realmLoading,
     },
     mints: {
       data: mints,
       error: mintsError,
       mutate: mintsMutate,
       isValidating: mintsIsValidating,
+      isLoading: mintsLoading,
     },
     governances: {
       data: governances,
       error: governancesError,
       mutate: governancesMutate,
       isValidating: governancesIsValidating,
+      isLoading: governancesLoading,
     },
-    isLoading: realmLoading || mintsLoading || governancesLoading,
+    proposals: {
+      data: proposals,
+      error: proposalsError,
+      mutate: proposalsMutate,
+      isValidating: proposalsIsValidating,
+      isLoading: proposalsLoading,
+    },
+    isLoading:
+      realmLoading || mintsLoading || governancesLoading || proposalsLoading,
   };
 };
