@@ -11,15 +11,14 @@ import { Connection, PublicKey } from "@solana/web3.js";
 import { useConnection } from "react-xnft";
 import useSWR from "swr";
 
-const fetchRealm = (connection: Connection, realmAddress: PublicKey) => {
-  return getRealm(connection, realmAddress);
+const fetchRealm = (connection: Connection, realmAddress: string) => {
+  return getRealm(connection, new PublicKey(realmAddress));
 };
 
 const fetchMints = async (
   connection: Connection,
   realm: ProgramAccount<Realm>
 ) => {
-  console.log("haha");
   const mintsArray = (
     await Promise.all([
       realm?.account.communityMint
@@ -38,17 +37,19 @@ const fetchMints = async (
 
 const fetchGovernances = async (
   connection: Connection,
-  realmId: PublicKey,
-  programId: PublicKey
+  realmId: string,
+  programId: string
 ) => {
-  const x = await getGovernanceAccounts(connection, programId, Governance, [
-    pubkeyFilter(1, realmId)!,
-  ]);
-
-  return x;
+  return getGovernanceAccounts(
+    connection,
+    new PublicKey(programId),
+    Governance,
+    [pubkeyFilter(1, new PublicKey(realmId))!]
+  );
 };
 
-export const useRealm = (realmId: PublicKey, programId: PublicKey) => {
+export const useRealm = (realmId: string, programId: string) => {
+  // console.log(`typeof realmId: ${typeof realmId}`);
   const connection = useConnection();
 
   const {
