@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Text, ScrollBar, List } from "react-xnft";
+import React, { useEffect } from "react";
+import { View, Text, ScrollBar, List, useNavigation } from "react-xnft";
 import { ProposalCard } from "../components/realm/ProposalCard";
 import { useRealm } from "../hooks";
 import { accountsToPubkeyMap } from "../utils/accounts";
@@ -10,10 +10,19 @@ import {
 } from "../utils/proposals";
 
 function Realm({ realmData }: any) {
-  const { realm, isLoading, mints, governances, proposals } = useRealm(
-    realmData.realmId,
-    realmData.programId
-  );
+  const nav = useNavigation();
+
+  const { realm, isLoading } = useRealm(realmData.realmId, realmData.programId);
+
+  useEffect(() => {
+    nav.setTitleStyle({
+      fontSize: "1.4rem",
+      fontWeight: "bold",
+    });
+    nav.setStyle({
+      backgroundColor: "#111827",
+    });
+  }, []);
 
   if (isLoading)
     return (
@@ -25,37 +34,40 @@ function Realm({ realmData }: any) {
     );
 
   return (
-    <ScrollBar style={{}}>
-      <View
-        style={{ height: "auto", padding: "1rem", backgroundColor: "#111827" }}
-      >
-        <View>
-          <Text
-            style={{
-              marginBottom: "0.8rem",
-              fontSize: "1.2rem",
-              fontWeight: "bold",
-            }}
-          >
-            Proposals
-          </Text>
-          <View>
-            {filterProposals(
-              Object.entries(proposals.data!).sort(([, a], [, b]) =>
-                compareProposals(
-                  b.account,
-                  a.account,
-                  accountsToPubkeyMap(governances.data!)
-                )
-              ),
-              InitialFilters
-            ).map(([key, value]) => (
-              <ProposalCard key={key} proposal={value} />
-            ))}
-          </View>
-        </View>
-      </View>
-    </ScrollBar>
+    <View>
+      <Text>{JSON.stringify(realm.data)}</Text>
+    </View>
+    // <ScrollBar style={{}}>
+    //   <View
+    //     style={{ height: "auto", padding: "1rem", backgroundColor: "#111827" }}
+    //   >
+    //     <View>
+    //       <Text
+    //         style={{
+    //           marginBottom: "0.8rem",
+    //           fontSize: "1.2rem",
+    //           fontWeight: "bold",
+    //         }}
+    //       >
+    //         Proposals
+    //       </Text>
+    //       <View>
+    //         {filterProposals(
+    //           Object.entries(proposals.data!).sort(([, a], [, b]) =>
+    //             compareProposals(
+    //               b.account,
+    //               a.account,
+    //               accountsToPubkeyMap(governances.data!)
+    //             )
+    //           ),
+    //           InitialFilters
+    //         ).map(([key, value]) => (
+    //           <ProposalCard key={key} proposal={value} />
+    //         ))}
+    //       </View>
+    //     </View>
+    //   </View>
+    // </ScrollBar>
   );
 }
 
