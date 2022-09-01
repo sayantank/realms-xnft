@@ -10,32 +10,32 @@ const REALMS = [
     website: "https://mango.markets",
     ogImage: "https://trade.mango.markets/assets/icons/logo.svg",
   },
-  // {
-  //   symbol: "PSY",
-  //   displayName: "Psy Finance",
-  //   programId: "GovHgfDPyQ1GwazJTDY2avSVY8GGcpmCapmmCsymRaGe",
-  //   realmId: "FiG6YoqWnVzUmxFNukcRVXZC51HvLr6mts8nxcm7ScR8",
-  //   website: "https://psyoptions.io",
-  //   ogImage:
-  //     "https://user-images.githubusercontent.com/32071703/149460918-3694084f-2a37-4c95-93d3-b5aaf078d444.png",
-  // },
-  // {
-  //   symbol: "SERUM",
-  //   displayName: "Serum DAO",
-  //   programId: "AVoAYTs36yB5izAaBkxRG67wL1AMwG3vo41hKtUSb8is",
-  //   realmId: "3MMDxjv1SzEFQDKryT7csAvaydYtrgMAc3L9xL9CVLCg",
-  //   website: "https://www.projectserum.com/",
-  //   ogImage:
-  //     "https://assets.website-files.com/61284dcff241c2f0729af9f3/61285237ce2e301255d09108_logo-serum.png",
-  // },
+  {
+    symbol: "PSY",
+    displayName: "Psy Finance",
+    programId: "GovHgfDPyQ1GwazJTDY2avSVY8GGcpmCapmmCsymRaGe",
+    realmId: "FiG6YoqWnVzUmxFNukcRVXZC51HvLr6mts8nxcm7ScR8",
+    website: "https://psyoptions.io",
+    ogImage:
+      "https://user-images.githubusercontent.com/32071703/149460918-3694084f-2a37-4c95-93d3-b5aaf078d444.png",
+  },
+  {
+    symbol: "SERUM",
+    displayName: "Serum DAO",
+    programId: "AVoAYTs36yB5izAaBkxRG67wL1AMwG3vo41hKtUSb8is",
+    realmId: "3MMDxjv1SzEFQDKryT7csAvaydYtrgMAc3L9xL9CVLCg",
+    website: "https://www.projectserum.com/",
+    ogImage:
+      "https://assets.website-files.com/61284dcff241c2f0729af9f3/61285237ce2e301255d09108_logo-serum.png",
+  },
 ];
 
-function Home() {
+function HomePage() {
   const nav = useNavigation();
 
   useEffect(() => {
     nav.setTitleStyle({
-      fontSize: "1.4rem",
+      fontSize: "1.2rem",
       fontWeight: "bold",
     });
     nav.setStyle({
@@ -100,4 +100,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default HomePage;

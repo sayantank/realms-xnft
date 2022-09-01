@@ -1,3 +1,5 @@
+import { PublicKey } from "@solana/web3.js";
+
 export function arrayToRecord<T>(
   source: readonly T[],
   getKey: (item: T) => string
@@ -6,4 +8,12 @@ export function arrayToRecord<T>(
     string,
     T
   >;
+}
+
+export function tryParsePublicKey(key: string): PublicKey | undefined {
+  try {
+    return new PublicKey(key);
+  } catch {
+    return undefined;
+  }
 }

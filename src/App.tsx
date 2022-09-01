@@ -15,7 +15,7 @@ export function App() {
             };
           case "realm":
             return {
-              title: "reealm",
+              title: route.props.realmData.displayName,
             };
           default:
             throw new Error("unknown route");
