@@ -1,21 +1,28 @@
 import React from "react";
 import { Stack, View, Text, Button } from "react-xnft";
-import Home from "./pages/Home";
-import Realm from "./pages/Realm";
+import CreateProposal from "./pages/create_proposal";
+import Home from "./pages/home";
+import Realm from "./pages/realm";
+
+export const APP_STACK = "app_";
 
 export function App() {
   return (
     <Stack.Navigator
-      initialRoute={{ name: "home" }}
+      initialRoute={{ name: APP_STACK + "home" }}
       options={({ route }) => {
         switch (route.name) {
-          case "home":
+          case APP_STACK + "home":
             return {
               title: "Realms",
             };
-          case "realm":
+          case APP_STACK + "realm":
             return {
               title: route.props.realmData.displayName,
+            };
+          case APP_STACK + "create_proposal":
+            return {
+              title: "Create Proposal",
             };
           default:
             throw new Error("unknown route");
@@ -23,12 +30,16 @@ export function App() {
       }}
     >
       <Stack.Screen
-        name={"home"}
+        name={APP_STACK + "home"}
         component={(props: any) => <Home {...props} />}
       />
       <Stack.Screen
-        name={"realm"}
+        name={APP_STACK + "realm"}
         component={(props: any) => <Realm {...props} />}
+      />
+      <Stack.Screen
+        name={APP_STACK + "create_proposal"}
+        component={(props: any) => <CreateProposal {...props} />}
       />
     </Stack.Navigator>
   );

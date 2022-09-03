@@ -14,14 +14,17 @@ import useSWR from "swr";
 import { accountsToPubkeyMap } from "../utils/accounts";
 import { HIDDEN_PROPOSALS } from "../utils/proposals";
 
-const fetchRealm = (connection: Connection, realmAddress: string) => {
+const fetchRealm = (
+  connection: Connection,
+  realmAddress: string
+): Promise<ProgramAccount<Realm>> => {
   return getRealm(connection, new PublicKey(realmAddress));
 };
 
 const fetchMints = async (
   connection: Connection,
   realm: ProgramAccount<Realm>
-) => {
+): Promise<Record<string, Mint>> => {
   const mintsArray = (
     await Promise.all([
       realm?.account.communityMint
@@ -42,7 +45,7 @@ const fetchGovernances = async (
   connection: Connection,
   realmId: string,
   programId: string
-) => {
+): Promise<ProgramAccount<Governance>[]> => {
   return getGovernanceAccounts(
     connection,
     new PublicKey(programId),
@@ -55,7 +58,7 @@ const fetchPropsosals = async (
   connection: Connection,
   programId: string,
   governances: ProgramAccount<Governance>[]
-) => {
+): Promise<Record<string, ProgramAccount<Proposal>>> => {
   const proposalsByGovernance = await Promise.all(
     governances.map((g) =>
       getGovernanceAccounts(connection, new PublicKey(programId), Proposal, [

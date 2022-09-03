@@ -1,37 +1,26 @@
+import { clusterApiUrl } from "@solana/web3.js";
 import React, { useEffect } from "react";
-import { Button, Text, Image, useNavigation, View } from "react-xnft";
-
-const REALMS = [
-  {
-    symbol: "MNGO",
-    displayName: "Mango DAO",
-    programId: "GqTPL6qRf5aUuqscLh8Rg2HTxPUXfhhAXDptTLhp1t2J",
-    realmId: "DPiH3H3c7t47BMxqTxLsuPQpEC6Kne8GA9VXbxpnZxFE",
-    website: "https://mango.markets",
-    ogImage: "https://trade.mango.markets/assets/icons/logo.svg",
-  },
-  {
-    symbol: "PSY",
-    displayName: "Psy Finance",
-    programId: "GovHgfDPyQ1GwazJTDY2avSVY8GGcpmCapmmCsymRaGe",
-    realmId: "FiG6YoqWnVzUmxFNukcRVXZC51HvLr6mts8nxcm7ScR8",
-    website: "https://psyoptions.io",
-    ogImage:
-      "https://user-images.githubusercontent.com/32071703/149460918-3694084f-2a37-4c95-93d3-b5aaf078d444.png",
-  },
-  {
-    symbol: "SERUM",
-    displayName: "Serum DAO",
-    programId: "AVoAYTs36yB5izAaBkxRG67wL1AMwG3vo41hKtUSb8is",
-    realmId: "3MMDxjv1SzEFQDKryT7csAvaydYtrgMAc3L9xL9CVLCg",
-    website: "https://www.projectserum.com/",
-    ogImage:
-      "https://assets.website-files.com/61284dcff241c2f0729af9f3/61285237ce2e301255d09108_logo-serum.png",
-  },
-];
+import {
+  Button,
+  Text,
+  Image,
+  useNavigation,
+  View,
+  useConnection,
+} from "react-xnft";
+import { APP_STACK } from "../App";
+import { DEVNET_REALMS, MAINNET_REALMS } from "../utils/realms";
 
 function HomePage() {
+  const connection = useConnection();
   const nav = useNavigation();
+
+  // const REALMS =
+  //   connection.rpcEndpoint === clusterApiUrl("mainnet-beta")
+  //     ? MAINNET_REALMS
+  //     : connection.rpcEndpoint === clusterApiUrl("devnet")
+  //     ? DEVNET_REALMS
+  //     : undefined;
 
   useEffect(() => {
     nav.setTitleStyle({
@@ -66,9 +55,9 @@ function HomePage() {
             gap: "0.8rem",
           }}
         >
-          {REALMS.map((realmData) => (
+          {DEVNET_REALMS.map((realmData) => (
             <Button
-              onClick={() => nav.push("realm", { realmData })}
+              onClick={() => nav.push(APP_STACK + "realm", { realmData })}
               key={realmData.realmId}
               style={{
                 width: "100%",
