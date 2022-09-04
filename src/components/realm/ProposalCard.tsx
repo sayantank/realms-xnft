@@ -15,16 +15,15 @@ export const ProposalCard = ({ proposal }: Props) => {
       .getYesVoteCount()
       .add(proposal.account.getNoVoteCount());
 
-    setYesPercentage(
-      proposal.account
-        .getYesVoteCount()
-        .mul(new BN(100))
-        .div(totalVotes)
-        .toNumber()
-    );
+    const yes = proposal.account
+      .getYesVoteCount()
+      .mul(new BN(100))
+      .div(totalVotes)
+      .toNumber();
+    setYesPercentage(yes);
 
-    setNoPercentage(100 - yesPercentage);
-  });
+    setNoPercentage(100 - yes);
+  }, [proposal]);
 
   return (
     <View

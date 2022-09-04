@@ -42,7 +42,7 @@ export default function Realm({ realmData }: any) {
         />
         <Tab.Screen
           name={REALM_TAB + "token_owner"}
-          component={() => <TokenOwner />}
+          component={() => <TokenOwner realmData={realmData} />}
         />
       </Tab.Navigator>
     </View>
