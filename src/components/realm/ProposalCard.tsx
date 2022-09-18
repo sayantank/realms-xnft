@@ -1,4 +1,4 @@
-import { ProgramAccount, Proposal } from "@solana/spl-governance";
+import { BN_ZERO, ProgramAccount, Proposal } from "@solana/spl-governance";
 import React, { useEffect } from "react";
 import { View, Text, Button } from "react-xnft";
 import BN from "bn.js";
@@ -15,14 +15,16 @@ export const ProposalCard = ({ proposal }: Props) => {
       .getYesVoteCount()
       .add(proposal.account.getNoVoteCount());
 
-    const yes = proposal.account
-      .getYesVoteCount()
-      .mul(new BN(100))
-      .div(totalVotes)
-      .toNumber();
-    setYesPercentage(yes);
+    if (totalVotes.gt(BN_ZERO)) {
+      const yes = proposal.account
+        .getYesVoteCount()
+        .mul(new BN(100))
+        .div(totalVotes)
+        .toNumber();
+      setYesPercentage(yes);
 
-    setNoPercentage(100 - yes);
+      setNoPercentage(100 - yes);
+    }
   }, [proposal]);
 
   return (
@@ -91,22 +93,37 @@ export const ProposalCard = ({ proposal }: Props) => {
             marginBottom: "0.8rem",
           }}
         >
-          <View
-            style={{
-              display: "inline",
-              width: `${yesPercentage}%`,
-              backgroundColor: "#2AC192",
-              height: "100%",
-            }}
-          ></View>
-          <View
-            style={{
-              display: "inline",
-              width: `${noPercentage}%`,
-              backgroundColor: "#ca3957",
-              height: "100%",
-            }}
-          ></View>
+          {yesPercentage || noPercentage ? (
+            <>
+              <View
+                style={{
+                  display: "inline",
+                  width: `${yesPercentage}%`,
+                  backgroundColor: "#2AC192",
+                  height: "100%",
+                }}
+              />
+              <View
+                style={{
+                  display: "inline",
+                  width: `${noPercentage}%`,
+                  backgroundColor: "#ca3957",
+                  height: "100%",
+                }}
+              />
+            </>
+          ) : (
+            <>
+              <View
+                style={{
+                  display: "inline",
+                  width: `100%`,
+                  backgroundColor: "#1F2937",
+                  height: "100%",
+                }}
+              />
+            </>
+          )}
         </View>
         <View style={{ display: "flex" }}>
           <Button

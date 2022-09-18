@@ -48,7 +48,7 @@ export const DEVNET_REALMS = [
     symbol: "SERUM",
     displayName: "Serum DAO",
     programId: "GTesTBiEWE32WHXXE2S4XbZvA5CrEc4xs6ZgRe895dP",
-    realmId: "55CMEEfWwXHxNgStWqPacz8vJeBTcEuJFHdFUsboDcHj",
+    realmId: "728SK7AjrcQXhBrGnkR8kA3wJrzff7jgDxa2ugcaXHq3",
     ogImage:
       "https://assets.website-files.com/61284dcff241c2f0729af9f3/61285237ce2e301255d09108_logo-serum.png",
   },

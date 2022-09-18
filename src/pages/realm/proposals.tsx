@@ -1,9 +1,9 @@
-import React, { useEffect } from "react";
+import { ProgramAccount, Proposal } from "@solana/spl-governance";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
   ScrollBar,
-  List,
   Loading,
   Button,
   useNavigation,
@@ -21,10 +21,30 @@ import {
 function ProposalsList({ realmData }: any) {
   const nav = useNavigation();
 
-  const { realm, isLoading, mints, governances, proposals } = useRealm(
+  const { data, isLoading, error } = useRealm(
     realmData.realmId,
     realmData.programId
   );
+
+  const [filteredProposal, setFilteredProposal] = React.useState<
+    [string, ProgramAccount<Proposal>][]
+  >([]);
+
+  useEffect(() => {
+    if (data) {
+      const filtered = filterProposals(
+        Object.entries(data.proposals).sort(([, a], [, b]) =>
+          compareProposals(
+            b.account,
+            a.account,
+            accountsToPubkeyMap(data.governances)
+          )
+        ),
+        InitialFilters
+      );
+      setFilteredProposal(filtered);
+    }
+  }, [data]);
 
   if (isLoading)
     return (
@@ -39,6 +59,16 @@ function ProposalsList({ realmData }: any) {
         }}
       >
         <Loading />
+      </View>
+    );
+
+  if (error)
+    return (
+      <View
+        style={{ height: "100%", padding: "1rem", backgroundColor: "#111827" }}
+      >
+        Something went wrong.
+        {error && JSON.stringify(error)}
       </View>
     );
 
@@ -67,23 +97,14 @@ function ProposalsList({ realmData }: any) {
           <Button
             style={{ backgroundColor: "#182541", color: "white" }}
             onClick={() =>
-              nav.push(APP_STACK + "create_proposal", { realm: realm.data })
+              nav.push(APP_STACK + "create_proposal", { realm: data!.realm })
             }
           >
             Create
           </Button>
         </View>
         <View>
-          {filterProposals(
-            Object.entries(proposals.data!).sort(([, a], [, b]) =>
-              compareProposals(
-                b.account,
-                a.account,
-                accountsToPubkeyMap(governances.data!)
-              )
-            ),
-            InitialFilters
-          ).map(([key, value]) => (
+          {filteredProposal.map(([key, value]) => (
             <ProposalCard key={key} proposal={value} />
           ))}
         </View>

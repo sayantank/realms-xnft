@@ -7,17 +7,17 @@ import { useTokenOwnerRecord } from "../../hooks";
 export default function TokenOwner({ realmData }: any) {
   const owner = usePublicKey();
 
-  const { realm, isLoading: realmLoading } = useRealm(
+  const { data: realm, isLoading: realmLoading } = useRealm(
     realmData.realmId,
     realmData.programId
   );
 
   const { communityTokenOwnerRecord, isLoading: tokenOwnerLoading } =
-    useTokenOwnerRecord(owner, realmData.programId, realm.data);
+    useTokenOwnerRecord(owner, realmData.programId, realm?.realm);
 
   const { balance, isLoading: balanceLoading } = useTokenBalance(
     owner,
-    realm.data ? realm.data.account.communityMint : undefined
+    realm ? realm.realm.account.communityMint : undefined
   );
 
   if (tokenOwnerLoading || balanceLoading || realmLoading) {
