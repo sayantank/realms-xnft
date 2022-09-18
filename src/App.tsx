@@ -1,8 +1,8 @@
 import React from "react";
 import { Stack, View, Text, Button } from "react-xnft";
-import CreateProposal from "./pages/create_proposal";
-import Home from "./pages/home";
-import Realm from "./pages/realm";
+import CreateProposal from "./stack/create_proposal";
+import Home from "./stack/home";
+import Realm from "./stack/realm";
 
 export const APP_STACK = "app_";
 
