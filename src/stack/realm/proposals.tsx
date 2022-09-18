@@ -11,40 +11,33 @@ import {
 import { APP_STACK } from "../../App";
 import { ProposalCard } from "../../components/realm/ProposalCard";
 import { useRealm } from "../../hooks";
-import { accountsToPubkeyMap } from "../../utils/accounts";
 import {
-  compareProposals,
   filterProposals,
+  Filters,
   InitialFilters,
 } from "../../utils/proposals";
 
 function ProposalsList({ realmData }: any) {
   const nav = useNavigation();
 
-  const { data, isLoading, error } = useRealm(
-    realmData.realmId,
-    realmData.programId
-  );
+  const [proposalFilter, setProposalFilter] = useState<Filters>(InitialFilters);
+
+  const {
+    data: realm,
+    isLoading,
+    error,
+  } = useRealm(realmData.realmId, realmData.programId);
 
   const [filteredProposal, setFilteredProposal] = React.useState<
-    [string, ProgramAccount<Proposal>][]
+    ProgramAccount<Proposal>[]
   >([]);
 
   useEffect(() => {
-    if (data) {
-      const filtered = filterProposals(
-        Object.entries(data.proposals).sort(([, a], [, b]) =>
-          compareProposals(
-            b.account,
-            a.account,
-            accountsToPubkeyMap(data.governances)
-          )
-        ),
-        InitialFilters
-      );
+    if (realm) {
+      const filtered = filterProposals(realm.proposals, proposalFilter);
       setFilteredProposal(filtered);
     }
-  }, [data]);
+  }, [realm, proposalFilter]);
 
   if (isLoading)
     return (
@@ -97,15 +90,15 @@ function ProposalsList({ realmData }: any) {
           <Button
             style={{ backgroundColor: "#182541", color: "white" }}
             onClick={() =>
-              nav.push(APP_STACK + "create_proposal", { realm: data!.realm })
+              nav.push(APP_STACK + "create_proposal", { realm: realm!.account })
             }
           >
             Create
           </Button>
         </View>
         <View>
-          {filteredProposal.map(([key, value]) => (
-            <ProposalCard key={key} proposal={value} />
+          {filteredProposal.map((p) => (
+            <ProposalCard key={p.pubkey.toBase58()} proposal={p} />
           ))}
         </View>
       </View>

@@ -9,11 +9,3 @@ export function arrayToRecord<T>(
     T
   >;
 }
-
-export function tryParsePublicKey(key: string): PublicKey | undefined {
-  try {
-    return new PublicKey(key);
-  } catch {
-    return undefined;
-  }
-}

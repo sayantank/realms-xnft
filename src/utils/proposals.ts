@@ -87,10 +87,10 @@ const hasInstructions = (proposal: Proposal) => {
 };
 
 export const filterProposals = (
-  proposals: [string, ProgramAccount<Proposal>][],
+  proposals: ProgramAccount<Proposal>[],
   filters: Filters
 ) => {
-  return proposals.filter(([, proposal]) => {
+  return proposals.filter((proposal) => {
     if (
       !filters.Cancelled &&
       proposal.account.state === ProposalState.Cancelled

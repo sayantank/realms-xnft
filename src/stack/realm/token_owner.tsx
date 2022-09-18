@@ -13,11 +13,11 @@ export default function TokenOwner({ realmData }: any) {
   );
 
   const { communityTokenOwnerRecord, isLoading: tokenOwnerLoading } =
-    useTokenOwnerRecord(owner, realmData.programId, realm?.realm);
+    useTokenOwnerRecord(owner, realmData.programId, realm?.account);
 
   const { balance, isLoading: balanceLoading } = useTokenBalance(
     owner,
-    realm ? realm.realm.account.communityMint : undefined
+    realm ? realm.communityMint.address : undefined
   );
 
   if (tokenOwnerLoading || balanceLoading || realmLoading) {
