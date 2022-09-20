@@ -52,6 +52,26 @@ export const useTokenOwnerRecord = (
   const communityTokenOwnerRecordLoading =
     !communityTokenOwnerRecord && !communityTokenOwnerRecordError;
 
+  const {
+    data: councilTokenOwnerRecord,
+    error: councilTokenOwnerRecordError,
+    mutate: councilTokenOwnerRecordMutate,
+    isValidating: councilTokenOwnerRecordIsValidating,
+  } = useSWR(
+    () =>
+      realm && [
+        connection,
+        realm.pubkey,
+        programId,
+        owner,
+        realm.account.config.councilMint,
+      ],
+    fetchTokenOwnerRecord
+  );
+
+  const councilTokenOwnerRecordLoading =
+    !councilTokenOwnerRecord && !councilTokenOwnerRecordError;
+
   return {
     communityTokenOwnerRecord: {
       data: communityTokenOwnerRecord,
@@ -59,6 +79,13 @@ export const useTokenOwnerRecord = (
       mutate: communityTokenOwnerRecordMutate,
       isValidating: communityTokenOwnerRecordIsValidating,
     },
-    isLoading: communityTokenOwnerRecordLoading,
+    councilTokenOwnerRecord: {
+      data: councilTokenOwnerRecord,
+      error: councilTokenOwnerRecordError,
+      mutate: councilTokenOwnerRecordMutate,
+      isValidating: councilTokenOwnerRecordIsValidating,
+    },
+    isLoading:
+      communityTokenOwnerRecordLoading || councilTokenOwnerRecordLoading,
   };
 };

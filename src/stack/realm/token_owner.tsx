@@ -1,10 +1,23 @@
-import React from "react";
-import { Text, usePublicKey, View, Button } from "react-xnft";
+import { Transaction } from "@solana/web3.js";
+import React, { useEffect, useState } from "react";
+import {
+  Text,
+  usePublicKey,
+  View,
+  Button,
+  TextField,
+  useConnection,
+} from "react-xnft";
 import LoadingScreen from "../../components/common/LoadingScreen";
 import { useRealm, useTokenBalance } from "../../hooks";
 import { useTokenOwnerRecord } from "../../hooks";
+import {
+  tokenAtomicsToPrettyDecimal,
+  tokenDecimalsToAtomics,
+} from "../../utils/token";
 
 export default function TokenOwner({ realmData }: any) {
+  const connection = useConnection();
   const owner = usePublicKey();
 
   const { data: realm, isLoading: realmLoading } = useRealm(
@@ -12,17 +25,63 @@ export default function TokenOwner({ realmData }: any) {
     realmData.programId
   );
 
-  const { communityTokenOwnerRecord, isLoading: tokenOwnerLoading } =
-    useTokenOwnerRecord(owner, realmData.programId, realm?.account);
+  const {
+    communityTokenOwnerRecord,
+    councilTokenOwnerRecord,
+    isLoading: tokenOwnerLoading,
+  } = useTokenOwnerRecord(owner, realmData.programId, realm?.account);
 
   const { balance, isLoading: balanceLoading } = useTokenBalance(
     owner,
     realm ? realm.communityMint.address : undefined
   );
 
+  const [communityAmount, setCommunityAmount] = useState(0);
+
   if (tokenOwnerLoading || balanceLoading || realmLoading) {
     return <LoadingScreen />;
   }
+
+  const canDepositCommunityTokens =
+    balance &&
+    balance.uiAmount &&
+    communityTokenOwnerRecord.data &&
+    communityAmount <= balance.uiAmount;
+
+  const handleDeposit = async () => {
+    // if (!didLaunch) throw new Error("xnft object unavailable.");
+    // Required possible undefined objects and other checks are to be handled in `disabled` prop.
+
+    const { instructions, preInstructions, postInstructions } =
+      await realm!.getDepositCommunityTokenInstructions(
+        connection,
+        tokenDecimalsToAtomics(communityAmount, realm!.communityMint.decimals),
+        owner
+      );
+
+    const { blockhash, lastValidBlockHeight } =
+      await connection.getLatestBlockhash();
+    const tx = new Transaction({
+      feePayer: owner,
+      blockhash,
+      lastValidBlockHeight,
+    }).add(...preInstructions, ...instructions, ...postInstructions);
+
+    const sig = await window.xnft.send(tx);
+    await connection.confirmTransaction(
+      {
+        blockhash: blockhash,
+        lastValidBlockHeight: lastValidBlockHeight,
+        signature: sig,
+      },
+      // confirmed doesn't seem to be long enough for mutate
+      "finalized"
+    );
+
+    setCommunityAmount(0);
+
+    await communityTokenOwnerRecord.mutate();
+  };
 
   return (
     <View
@@ -40,6 +99,59 @@ export default function TokenOwner({ realmData }: any) {
       </View>
       <View
         style={{
+          width: "100%",
+          display: "grid",
+          gap: "0.6rem",
+          gridTemplateColumns: "1fr 1fr",
+          marginBottom: "0.8rem",
+        }}
+      >
+        <View
+          style={{
+            borderRadius: "0.8rem",
+            backgroundColor: "#1F2937",
+            padding: "0.6rem",
+          }}
+        >
+          <Text style={{ color: "#fff", fontSize: "0.8rem", fontWeight: 500 }}>
+            Community Weight
+          </Text>
+          <Text style={{ fontSize: "1.2rem", fontWeight: "bold" }}>
+            {communityTokenOwnerRecord.data
+              ? tokenAtomicsToPrettyDecimal(
+                  communityTokenOwnerRecord.data.account
+                    .governingTokenDepositAmount,
+                  realm!.communityMint.decimals,
+                  2
+                )
+              : 0}
+          </Text>
+        </View>
+        <View
+          style={{
+            borderRadius: "0.8rem",
+            backgroundColor: "#1F2937",
+            padding: "0.6rem",
+            opacity: councilTokenOwnerRecord.data ? "100%" : "30%",
+          }}
+        >
+          <Text style={{ color: "#fff", fontSize: "0.8rem", fontWeight: 500 }}>
+            Council Weight
+          </Text>
+          <Text style={{ fontSize: "1.2rem", fontWeight: "bold" }}>
+            {councilTokenOwnerRecord.data
+              ? tokenAtomicsToPrettyDecimal(
+                  councilTokenOwnerRecord.data.account
+                    .governingTokenDepositAmount,
+                  realm!.councilMint ? realm!.councilMint.decimals : 6, // assured to work given !!councilTokenOwnerRecord.data
+                  2
+                )
+              : 0}
+          </Text>
+        </View>
+      </View>
+      <View
+        style={{
           padding: "0.8rem",
           backgroundColor: "#1F2937",
           borderRadius: "0.6rem",
@@ -51,7 +163,7 @@ export default function TokenOwner({ realmData }: any) {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            marginBottom: "0.4rem",
+            marginBottom: "0.2rem",
           }}
         >
           <Text style={{ color: "#fff", fontSize: "0.9rem", fontWeight: 500 }}>
@@ -61,21 +173,12 @@ export default function TokenOwner({ realmData }: any) {
             Balance: {balance ? balance.uiAmount : 0}
           </Text>
         </View>
-        <View
-          style={{
-            backgroundColor: "rgba(255, 255, 255, 0.04)",
-            padding: "0.4rem 0.6rem",
-            borderRadius: "0.4rem",
-            marginBottom: "0.6rem",
-          }}
-        >
-          <Text style={{ fontSize: "1.2rem", fontWeight: "bold" }}>
-            {communityTokenOwnerRecord.data
-              ? communityTokenOwnerRecord.data.account
-                  .governingTokenDepositAmount
-              : 0}
-          </Text>
-        </View>
+        <TextField
+          type="number"
+          value={communityAmount}
+          onChange={(e) => setCommunityAmount(Number(e.data.value))}
+          style={{ marginBottom: "0.4rem" }}
+        />
         <View
           style={{
             width: "100%",
@@ -92,16 +195,20 @@ export default function TokenOwner({ realmData }: any) {
               backgroundColor: "#324d89",
               color: "#fff",
             }}
+            onClick={handleDeposit}
+            disabled={!canDepositCommunityTokens}
           >
             Deposit
           </Button>
           <Button
+            disabled={true}
             style={{
               flex: 1,
               marginLeft: "0.5rem",
               backgroundColor: "#324d89",
               color: "#fff",
             }}
+            onClick={() => console.log("TEST: withdraw")}
           >
             Withdraw
           </Button>

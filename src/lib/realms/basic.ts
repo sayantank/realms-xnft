@@ -10,7 +10,11 @@ import {
   pubkeyFilter,
   Proposal,
 } from "@solana/spl-governance";
-import { getAssociatedTokenAddressSync, getMint } from "@solana/spl-token";
+import {
+  createAssociatedTokenAccountInstruction,
+  getAssociatedTokenAddressSync,
+  getMint,
+} from "@solana/spl-token";
 import {
   Connection,
   PublicKey,
@@ -19,13 +23,15 @@ import {
 } from "@solana/web3.js";
 import BN from "bn.js";
 import { accountsToPubkeyMap } from "../../utils/accounts";
+import { getAllAssets } from "../../utils/assets";
 import { arrayToRecord } from "../../utils/helpers";
 import { compareProposals } from "../../utils/proposals";
 import { arePubkeysEqual } from "../../utils/pubkey";
 import { getMintMeta } from "../../utils/token";
 import { LibError } from "../errors";
+import { Asset, AssetType } from "../interfaces/asset";
 import { IRealm } from "../interfaces/realm";
-import { MintMeta } from "../types";
+import { InstructionSet, MintMeta } from "../types";
 
 export class BasicRealm implements IRealm {
   public readonly id = "basic";
@@ -39,6 +45,7 @@ export class BasicRealm implements IRealm {
 
   private _governances: ProgramAccount<Governance>[] = [];
   private _proposals: ProgramAccount<Proposal>[] = [];
+  private _assets: Asset[] = [];
 
   constructor(
     programId: PublicKey,
@@ -47,6 +54,7 @@ export class BasicRealm implements IRealm {
     communityMintMeta: MintMeta,
     governances: ProgramAccount<Governance>[],
     proposals: ProgramAccount<Proposal>[],
+    assets: Asset[],
     councilMintMeta?: MintMeta,
     imageUrl?: string
   ) {
@@ -58,6 +66,7 @@ export class BasicRealm implements IRealm {
     this._imageUrl = imageUrl;
     this._governances = governances;
     this._proposals = proposals;
+    this._assets = assets;
   }
 
   public get programId(): PublicKey {
@@ -112,6 +121,10 @@ export class BasicRealm implements IRealm {
     return this._proposals;
   }
 
+  public get assets(): Asset[] {
+    return this._assets;
+  }
+
   static async load(
     connection: Connection,
     realmId: PublicKey,
@@ -137,11 +150,13 @@ export class BasicRealm implements IRealm {
     const communityMint = realmAccount.account.communityMint;
     const councilMint = realmAccount.account.config.councilMint;
 
+    // Get mint metas
     const communityMintMeta = await getMintMeta(connection, communityMint);
     const councilMintMeta = councilMint
       ? await getMintMeta(connection, councilMint)
       : undefined;
 
+    // get governances
     const governances = await getGovernanceAccounts(
       connection,
       new PublicKey(programId),
@@ -149,6 +164,7 @@ export class BasicRealm implements IRealm {
       [pubkeyFilter(1, realmId)!]
     );
 
+    // get proposals
     const proposalsByGovernance = await Promise.all(
       governances.map((g) =>
         getGovernanceAccounts(connection, new PublicKey(programId), Proposal, [
@@ -156,10 +172,14 @@ export class BasicRealm implements IRealm {
         ])
       )
     );
+    // sort proposals rightaway
     const proposals = proposalsByGovernance.flatMap((p) => p);
     proposals.sort((a, b) =>
       compareProposals(a.account, b.account, accountsToPubkeyMap(governances))
     );
+
+    // get assets
+    const assets = await getAllAssets(connection, governances, programId);
 
     return new BasicRealm(
       programId,
@@ -168,23 +188,49 @@ export class BasicRealm implements IRealm {
       communityMintMeta,
       governances,
       proposals,
+      assets,
       councilMintMeta,
       imageUrl
     );
   }
 
-  public async getDepositCommunityMintTransaction(
+  //TODO: implement
+  public canCreateProposal(
+    owner: PublicKey,
+    governance?: ProgramAccount<Governance>
+  ): boolean {
+    if (!governance) return false;
+    return true;
+  }
+
+  public async getDepositCommunityTokenInstructions(
     connection: Connection,
     amount: BN,
     owner: PublicKey
-  ): Promise<Transaction> {
+  ): Promise<InstructionSet> {
     const instructions: TransactionInstruction[] = [];
+    const preInstructions: TransactionInstruction[] = [];
+    const postInstructions: TransactionInstruction[] = [];
 
     const ataAddress = await getAssociatedTokenAddressSync(
       this.communityMint.address,
       owner,
       true
     );
+    try {
+      await connection.getTokenAccountBalance(ataAddress);
+    } catch (e) {
+      console.error("ATA not found. Adding create instruction");
+      // Create ATA
+      preInstructions.push(
+        await createAssociatedTokenAccountInstruction(
+          owner,
+          ataAddress,
+          owner,
+          this._communityMintMeta.address
+        )
+      );
+    }
 
     await withDepositGoverningTokens(
       instructions,
@@ -199,15 +245,10 @@ export class BasicRealm implements IRealm {
       amount
     );
 
-    const { blockhash, lastValidBlockHeight } =
-      await connection.getLatestBlockhash();
-
-    const tx = new Transaction({
-      feePayer: owner,
-      blockhash,
-      lastValidBlockHeight,
-    }).add(...instructions);
-
-    return tx;
+    return {
+      instructions,
+      preInstructions,
+      postInstructions,
+    };
   }
 }

@@ -89,8 +89,9 @@ function ProposalsList({ realmData }: any) {
           </Text>
           <Button
             style={{ backgroundColor: "#182541", color: "white" }}
+            disabled={true}
             onClick={() =>
-              nav.push(APP_STACK + "create_proposal", { realm: realm!.account })
+              nav.push(APP_STACK + "create_proposal", { realm: realm })
             }
           >
             Create

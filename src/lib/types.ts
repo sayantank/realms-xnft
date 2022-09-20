@@ -1,4 +1,4 @@
-import { PublicKey } from "@solana/web3.js";
+import { PublicKey, TransactionInstruction } from "@solana/web3.js";
 
 export type MintMeta = {
   address: PublicKey;
@@ -7,4 +7,10 @@ export type MintMeta = {
   freezeAuthority: PublicKey | null;
   name?: string;
   symbol?: string;
+};
+
+export type InstructionSet = {
+  instructions: TransactionInstruction[];
+  preInstructions: TransactionInstruction[];
+  postInstructions: TransactionInstruction[];
 };

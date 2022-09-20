@@ -5,9 +5,10 @@ import {
   Proposal,
   Realm,
 } from "@solana/spl-governance";
-import { PublicKey } from "@solana/web3.js";
+import { Connection, PublicKey } from "@solana/web3.js";
 import BN from "bn.js";
-import { MintMeta } from "../types";
+import { InstructionSet, MintMeta } from "../types";
+import { Asset, AssetType } from "./asset";
 
 export interface IRealm {
   id: string;
@@ -24,4 +25,16 @@ export interface IRealm {
   minVoteWeightToCreateGovernance: BN;
   governances: ProgramAccount<Governance>[];
   proposals: ProgramAccount<Proposal>[];
+  assets: Asset[];
+
+  canCreateProposal(
+    owner: PublicKey,
+    governance: ProgramAccount<Governance>
+  ): boolean;
+
+  getDepositCommunityTokenInstructions(
+    connection: Connection,
+    amount: BN,
+    owner: PublicKey
+  ): Promise<InstructionSet>;
 }
