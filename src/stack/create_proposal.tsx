@@ -1,9 +1,9 @@
-import { ProgramAccount, Realm } from "@solana/spl-governance";
-import React from "react";
+import React, { useState } from "react";
 import { View } from "react-xnft";
+import { Dropdown } from "../components/common/Dropdown";
 import LoadingScreen from "../components/common/LoadingScreen";
-import { CreateATAInstruction } from "../lib/instructions/CreateATA";
 import { IRealm } from "../lib/interfaces/realm";
+import { getInstructions } from "../utils/proposals";
 
 export interface CreateProposalProps {
   realm?: IRealm;
@@ -14,13 +14,22 @@ export default function CreateProposal({ realm }: CreateProposalProps) {
     return <LoadingScreen />;
   }
 
-  const createATA = new CreateATAInstruction();
+  const [instructions] = useState(getInstructions());
+
+  const [selectedInstruction, setSelectedInstruction] = useState(
+    instructions[0]
+  );
 
   return (
     <View
       style={{ height: "100%", padding: "1rem", backgroundColor: "#111827" }}
     >
-      <createATA.Component title="hello world" />
+      <Dropdown
+        selectedOption={selectedInstruction}
+        options={instructions}
+        onChange={(i) => setSelectedInstruction(i)}
+      />
+      <selectedInstruction.value.Form />
     </View>
   );
 }

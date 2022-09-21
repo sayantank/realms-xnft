@@ -4,12 +4,12 @@ import CreateATAScreen, {
 import { IInstruction } from "../interfaces/instruction";
 
 export class CreateATAInstruction implements IInstruction {
-  private _component: (props: CreateATAScreenProps) => JSX.Element;
+  private _form: (props: CreateATAScreenProps) => JSX.Element;
   constructor() {
-    this._component = CreateATAScreen;
+    this._form = CreateATAScreen;
   }
 
-  public get Component(): (props: CreateATAScreenProps) => JSX.Element {
-    return this._component;
+  public get Form(): (props: CreateATAScreenProps) => JSX.Element {
+    return this._form;
   }
 }

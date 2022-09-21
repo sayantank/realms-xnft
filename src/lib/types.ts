@@ -23,3 +23,8 @@ export type NativeTreasury = {
   governance: ProgramAccount<Governance>;
   programId: PublicKey;
 };
+
+export type DropdownOption<T> = {
+  label: string;
+  value: T;
+};

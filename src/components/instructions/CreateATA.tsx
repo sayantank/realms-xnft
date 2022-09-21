@@ -4,6 +4,6 @@ import { View } from "react-xnft";
 export type CreateATAScreenProps = {
   title: string;
 };
-export default function CreateATAScreen({ title }: CreateATAScreenProps) {
-  return <View>{title}</View>;
+export default function CreateATAScreen() {
+  return <View>CreateATA</View>;
 }

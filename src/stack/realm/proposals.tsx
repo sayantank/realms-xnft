@@ -2,7 +2,8 @@ import { ProgramAccount, Proposal } from "@solana/spl-governance";
 import React, { useEffect, useState } from "react";
 import { View, Text, ScrollBar, Button, useNavigation } from "react-xnft";
 import { APP_STACK } from "../../App";
-import { ProposalCard } from "../../components/realm/ProposalCard";
+import TitleCTA from "../../components/common/TitleCTA";
+import { ProposalCard } from "../../components/realm/proposals/ProposalCard";
 import { IRealm } from "../../lib/interfaces/realm";
 import {
   filterProposals,
@@ -32,25 +33,13 @@ function ProposalsList({ realm }: { realm?: IRealm }) {
       <View
         style={{ height: "100%", padding: "1rem", backgroundColor: "#111827" }}
       >
-        <View
-          style={{
-            width: "100%",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "0.5rem",
-          }}
-        >
-          <Text
-            style={{
-              fontSize: "1.2rem",
-              fontWeight: "bold",
-            }}
-          >
-            Proposals
-          </Text>
+        <TitleCTA title="Proposals">
           <Button
-            style={{ backgroundColor: "#182541", color: "white" }}
+            style={{
+              backgroundColor: "#182541",
+              color: "white",
+              width: "auto",
+            }}
             disabled={true}
             onClick={() =>
               nav.push(APP_STACK + "create_proposal", { realm: realm })
@@ -58,7 +47,7 @@ function ProposalsList({ realm }: { realm?: IRealm }) {
           >
             Create
           </Button>
-        </View>
+        </TitleCTA>
         <View>
           {filteredProposal.map((p) => (
             <ProposalCard key={p.pubkey.toBase58()} proposal={p} />

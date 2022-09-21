@@ -1,3 +1,3 @@
 export interface IInstruction {
-  Component: (props: any) => JSX.Element;
+  Form: (props: any) => JSX.Element;
 }

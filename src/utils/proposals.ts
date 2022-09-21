@@ -4,6 +4,12 @@ import {
   Proposal,
   ProposalState,
 } from "@solana/spl-governance";
+import {
+  CreateATAInstruction,
+  DropdownOption,
+  TransferInstruction,
+} from "../lib";
+import { IInstruction } from "../lib/interfaces/instruction";
 
 // Blacklisted proposals which should not be displayed in the UI
 // TODO: Add this to on-chain metadata to Proposal account
@@ -25,17 +31,6 @@ export const InitialFilters = {
 };
 
 export type Filters = typeof InitialFilters;
-
-function getVotingStateRank(
-  proposal: Proposal,
-  governances: {
-    [governance: string]: ProgramAccount<Governance>;
-  }
-) {
-  // Show proposals in Voting state before proposals in Finalizing state
-  const governance = governances[proposal.governance.toBase58()].account;
-  return proposal.hasVoteTimeEnded(governance) ? 0 : 1;
-}
 
 export const compareProposals = (
   p1: Proposal,
@@ -68,22 +63,6 @@ export const compareProposals = (
   }
 
   return p1.getStateTimestamp() - p2.getStateTimestamp();
-};
-
-const hasInstructions = (proposal: Proposal) => {
-  if (proposal.instructionsCount) {
-    return true;
-  }
-
-  if (proposal.options) {
-    for (const option of proposal.options) {
-      if (option.instructionsCount) {
-        return true;
-      }
-    }
-  }
-
-  return false;
 };
 
 export const filterProposals = (
@@ -155,4 +134,44 @@ export const filterProposals = (
 
     return true;
   });
+};
+
+export function getInstructions(): DropdownOption<IInstruction>[] {
+  return [
+    {
+      label: "Create Associated Token Account",
+      value: new CreateATAInstruction(),
+    },
+    {
+      label: "Transfer",
+      value: new TransferInstruction(),
+    },
+  ];
+}
+
+function getVotingStateRank(
+  proposal: Proposal,
+  governances: {
+    [governance: string]: ProgramAccount<Governance>;
+  }
+) {
+  // Show proposals in Voting state before proposals in Finalizing state
+  const governance = governances[proposal.governance.toBase58()].account;
+  return proposal.hasVoteTimeEnded(governance) ? 0 : 1;
+}
+
+const hasInstructions = (proposal: Proposal) => {
+  if (proposal.instructionsCount) {
+    return true;
+  }
+
+  if (proposal.options) {
+    for (const option of proposal.options) {
+      if (option.instructionsCount) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 };
