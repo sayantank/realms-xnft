@@ -7,38 +7,37 @@ import {
   Button,
   TextField,
   useConnection,
+  useDidLaunch,
 } from "react-xnft";
 import LoadingScreen from "../../components/common/LoadingScreen";
 import { useRealm, useTokenBalance } from "../../hooks";
 import { useTokenOwnerRecord } from "../../hooks";
+import { IRealm } from "../../lib/interfaces/realm";
 import {
   tokenAtomicsToPrettyDecimal,
   tokenDecimalsToAtomics,
 } from "../../utils/token";
 
-export default function TokenOwner({ realmData }: any) {
+// We can assume realm is defined because loading/error taken care of at index.
+export default function TokenOwner({ realm }: { realm?: IRealm }) {
+  const didLaunch = useDidLaunch();
   const connection = useConnection();
   const owner = usePublicKey();
-
-  const { data: realm, isLoading: realmLoading } = useRealm(
-    realmData.realmId,
-    realmData.programId
-  );
 
   const {
     communityTokenOwnerRecord,
     councilTokenOwnerRecord,
     isLoading: tokenOwnerLoading,
-  } = useTokenOwnerRecord(owner, realmData.programId, realm?.account);
+  } = useTokenOwnerRecord(owner, realm!.programId.toString(), realm?.account);
 
   const { balance, isLoading: balanceLoading } = useTokenBalance(
     owner,
-    realm ? realm.communityMint.address : undefined
+    realm!.communityMint.address
   );
 
   const [communityAmount, setCommunityAmount] = useState(0);
 
-  if (tokenOwnerLoading || balanceLoading || realmLoading) {
+  if (tokenOwnerLoading || balanceLoading) {
     return <LoadingScreen />;
   }
 
@@ -49,7 +48,7 @@ export default function TokenOwner({ realmData }: any) {
     communityAmount <= balance.uiAmount;
 
   const handleDeposit = async () => {
-    // if (!didLaunch) throw new Error("xnft object unavailable.");
+    if (!didLaunch) throw new Error("xnft object unavailable.");
     // Required possible undefined objects and other checks are to be handled in `disabled` prop.
 
     const { instructions, preInstructions, postInstructions } =
@@ -75,7 +74,7 @@ export default function TokenOwner({ realmData }: any) {
         signature: sig,
       },
       // confirmed doesn't seem to be long enough for mutate
-      "finalized"
+      "confirmed"
     );
 
     setCommunityAmount(0);
