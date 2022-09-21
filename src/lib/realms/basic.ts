@@ -15,23 +15,18 @@ import {
   getAssociatedTokenAddressSync,
   getMint,
 } from "@solana/spl-token";
-import {
-  Connection,
-  PublicKey,
-  Transaction,
-  TransactionInstruction,
-} from "@solana/web3.js";
+import { Connection, PublicKey, TransactionInstruction } from "@solana/web3.js";
 import BN from "bn.js";
 import { accountsToPubkeyMap } from "../../utils/accounts";
 import { getAllAssets } from "../../utils/assets";
-import { arrayToRecord } from "../../utils/helpers";
+import { getNativeTreasuries } from "../../utils/governance";
 import { compareProposals } from "../../utils/proposals";
 import { arePubkeysEqual } from "../../utils/pubkey";
 import { getMintMeta } from "../../utils/token";
 import { LibError } from "../errors";
-import { Asset, AssetType } from "../interfaces/asset";
+import { Assets } from "../interfaces/asset";
 import { IRealm } from "../interfaces/realm";
-import { InstructionSet, MintMeta } from "../types";
+import { InstructionSet, MintMeta, NativeTreasury } from "../types";
 
 export class BasicRealm implements IRealm {
   public readonly id = "basic";
@@ -45,7 +40,8 @@ export class BasicRealm implements IRealm {
 
   private _governances: ProgramAccount<Governance>[] = [];
   private _proposals: ProgramAccount<Proposal>[] = [];
-  private _assets: Asset[] = [];
+  private _nativeTreasuries: NativeTreasury[] = [];
+  private _assets: Assets;
 
   constructor(
     programId: PublicKey,
@@ -54,7 +50,8 @@ export class BasicRealm implements IRealm {
     communityMintMeta: MintMeta,
     governances: ProgramAccount<Governance>[],
     proposals: ProgramAccount<Proposal>[],
-    assets: Asset[],
+    nativeTreasuries: NativeTreasury[],
+    assets: Assets,
     councilMintMeta?: MintMeta,
     imageUrl?: string
   ) {
@@ -66,6 +63,7 @@ export class BasicRealm implements IRealm {
     this._imageUrl = imageUrl;
     this._governances = governances;
     this._proposals = proposals;
+    this._nativeTreasuries = nativeTreasuries;
     this._assets = assets;
   }
 
@@ -121,7 +119,11 @@ export class BasicRealm implements IRealm {
     return this._proposals;
   }
 
-  public get assets(): Asset[] {
+  public get nativeTreasuries(): NativeTreasury[] {
+    return this._nativeTreasuries;
+  }
+
+  public get assets(): Assets {
     return this._assets;
   }
 
@@ -181,6 +183,13 @@ export class BasicRealm implements IRealm {
     // get assets
     const assets = await getAllAssets(connection, governances, programId);
 
+    // get native treasuries
+    const nativeTreasuries = await getNativeTreasuries(
+      connection,
+      governances,
+      programId
+    );
+
     return new BasicRealm(
       programId,
       programVersion,
@@ -188,6 +197,7 @@ export class BasicRealm implements IRealm {
       communityMintMeta,
       governances,
       proposals,
+      nativeTreasuries,
       assets,
       councilMintMeta,
       imageUrl

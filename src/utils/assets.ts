@@ -8,7 +8,7 @@ import { AccountLayout } from "@solana/spl-token";
 import { Connection, PublicKey } from "@solana/web3.js";
 import BN from "bn.js";
 import {
-  Asset,
+  Assets,
   AssetType,
   MintAssetType,
   ProgramAssetType,
@@ -24,13 +24,18 @@ export const getAllAssets = async (
   connection: Connection,
   governances: ProgramAccount<Governance>[],
   programId: PublicKey
-): Promise<Asset[]> => {
-  const assets = await Promise.all([
+): Promise<Assets> => {
+  const [mintAssets, programAssets, tokenAccountAssets] = await Promise.all([
     getMintAssets(connection, governances),
     getProgramAssets(connection, governances),
     getTokenAccountAssets(connection, governances, programId),
   ]);
-  return assets.flat();
+
+  return {
+    mintAssets,
+    programAssets,
+    tokenAccountAssets,
+  };
 };
 
 export const getMintAssets = async (
@@ -114,6 +119,7 @@ export const getTokenAccountAssets = async (
     (i) => i.address.toBase58()
   );
 
+  // Fetching token accounts owned by both Governance PDA and Native Treasury PDA
   const rawTokenAccounts = (await Promise.all([
     fetchTokenAccounts(
       connection,

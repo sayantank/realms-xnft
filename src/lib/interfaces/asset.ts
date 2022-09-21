@@ -27,4 +27,8 @@ export interface TokenAccountAssetType extends BaseAssetType {
   mint: PublicKey;
 }
 
-export type Asset = MintAssetType | ProgramAssetType | TokenAccountAssetType;
+export type Assets = {
+  mintAssets: MintAssetType[];
+  programAssets: ProgramAssetType[];
+  tokenAccountAssets: TokenAccountAssetType[];
+};

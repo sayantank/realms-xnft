@@ -17,3 +17,11 @@ export function parseProgramAccount(
 
   return account;
 }
+
+export function parseNativeAccount(
+  account: AccountInfo<Buffer> | null
+): AccountInfo<Buffer> {
+  if (!account) throw new Error("Native account is null");
+
+  return account;
+}

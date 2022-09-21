@@ -1,32 +1,20 @@
 import { ProgramAccount, Proposal } from "@solana/spl-governance";
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  ScrollBar,
-  Loading,
-  Button,
-  useNavigation,
-} from "react-xnft";
+import { View, Text, ScrollBar, Button, useNavigation } from "react-xnft";
 import { APP_STACK } from "../../App";
 import { ProposalCard } from "../../components/realm/ProposalCard";
-import { useRealm } from "../../hooks";
+import { IRealm } from "../../lib/interfaces/realm";
 import {
   filterProposals,
   Filters,
   InitialFilters,
 } from "../../utils/proposals";
 
-function ProposalsList({ realmData }: any) {
+// We can assume realm is defined because loading/error taken care of at index.
+function ProposalsList({ realm }: { realm?: IRealm }) {
   const nav = useNavigation();
 
   const [proposalFilter, setProposalFilter] = useState<Filters>(InitialFilters);
-
-  const {
-    data: realm,
-    isLoading,
-    error,
-  } = useRealm(realmData.realmId, realmData.programId);
 
   const [filteredProposal, setFilteredProposal] = React.useState<
     ProgramAccount<Proposal>[]
@@ -38,32 +26,6 @@ function ProposalsList({ realmData }: any) {
       setFilteredProposal(filtered);
     }
   }, [realm, proposalFilter]);
-
-  if (isLoading)
-    return (
-      <View
-        style={{
-          height: "100%",
-          padding: "1rem",
-          backgroundColor: "#111827",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Loading />
-      </View>
-    );
-
-  if (error)
-    return (
-      <View
-        style={{ height: "100%", padding: "1rem", backgroundColor: "#111827" }}
-      >
-        Something went wrong.
-        {error && JSON.stringify(error)}
-      </View>
-    );
 
   return (
     <ScrollBar style={{}}>

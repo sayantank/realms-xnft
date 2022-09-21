@@ -7,8 +7,8 @@ import {
 } from "@solana/spl-governance";
 import { Connection, PublicKey } from "@solana/web3.js";
 import BN from "bn.js";
-import { InstructionSet, MintMeta } from "../types";
-import { Asset, AssetType } from "./asset";
+import { InstructionSet, MintMeta, NativeTreasury } from "../types";
+import { Assets, AssetType } from "./asset";
 
 export interface IRealm {
   id: string;
@@ -25,7 +25,8 @@ export interface IRealm {
   minVoteWeightToCreateGovernance: BN;
   governances: ProgramAccount<Governance>[];
   proposals: ProgramAccount<Proposal>[];
-  assets: Asset[];
+  nativeTreasuries: NativeTreasury[];
+  assets: Assets;
 
   canCreateProposal(
     owner: PublicKey,

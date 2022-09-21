@@ -1,4 +1,6 @@
-import { PublicKey } from "@solana/web3.js";
+export function logTest(message: string, ...optional: any[]) {
+  console.log(`TEST: ${message}`, optional);
+}
 
 export function arrayToRecord<T>(
   source: readonly T[],
